@@ -1,0 +1,104 @@
+{
+  "org_name": "Cinema Verde",
+  "legal_name": "Gainesville Environmental Film and Arts Festival",
+  "location": "Gainesville, Florida",
+  "founded": 2010,
+  "legal_status": {
+    "type": "501(c)(3) public charity",
+    "state": "Florida nonprofit corporation",
+    "solicitation_license": "CH33749",
+    "ein": "27-3021913",
+    "ntee_category": "Environmental Quality, Protection and Beautification / Environmental Education and Outdoor Survival Programs"
+  },
+  "mission": "To provide environmental education to the public through film, arts, workshops, events, tours and any other forum or media. We strive to increase awareness of environmental practices that enhance public health and improve quality of life in urban, suburban and rural settings.",
+  "leadership": {
+    "founding_director": "Trish Riley",
+    "director_credentials": "National award-winning investigative and environmental journalist and author. Published books include The Complete Idiot's Guide to Green Living (2007) and The Complete Idiot's Guide to Greening Your Business (Penguin, 2009). Past board member of the American Society of Journalists and Authors. Member of the Society of Environmental Journalists. Honorary member of the Golden Key International Honour Society. Also founded GoGreenNation.org and Green Drinks Gainesville."
+  },
+  "staff": {
+    "size": "small team (under 10)",
+    "key_members": [
+      {"name": "Trish Riley", "role": "Founding Director"},
+      {"name": "Thomas Berning", "role": "Technical Director and Webmaster"},
+      {"name": "Christine Heinrichs", "role": "Writer and contributor"}
+    ],
+    "board_members": ["Thomas Berning", "Rachel Rector"],
+    "note": "All key staff and board members report $0 compensation. Organization relies heavily on interns and volunteers representing an array of nationalities."
+  },
+  "programs": [
+    {
+      "name": "Annual Environmental Film Festival",
+      "description": "Flagship program running since 2010. Screens independent environmental films from around the world with filmmaker Q&As, live discussions, and community events. Held in Gainesville with past satellite events in St. Augustine.",
+      "years_running": 16
+    },
+    {
+      "name": "Environmental Film Streaming Platform",
+      "description": "Year-round streaming platform at cinemaverde.org featuring curated environmental films from independent filmmakers worldwide. Available via web and Roku channel. Free to the public on Roku."
+    },
+    {
+      "name": "Community Events",
+      "description": "Earth Day celebrations, community cleanups (e.g., Ashley Creek cleanup), local film screenings at venues like Cypress & Grove Brewing, sustainable showcases, and awards dinners."
+    },
+    {
+      "name": "Sustainable Business Spotlight",
+      "description": "Program highlighting sustainable businesses committed to environmental practices."
+    }
+  ],
+  "impact_metrics": {
+    "total_festivals": 16,
+    "filmmakers_supported": "200+",
+    "countries_represented": "50+",
+    "recent_festival_sizes": {
+      "2025": "33 films",
+      "2024": "75+ films",
+      "2023": "70 films",
+      "2020": "48 films from 12 countries",
+      "2017": "45 films from 14 countries"
+    },
+    "festival_venues": [
+      "Cypress & Grove Brewing Company",
+      "Heartwood Soundstage",
+      "The Hippodrome State Theatre",
+      "The Historic Depot Station",
+      "The Paramount Plaza Hotel"
+    ]
+  },
+  "partnerships": [
+    "Cypress & Grove Brewing Company (recurring venue partner)",
+    "Keep Alachua County Beautiful (cleanup events)",
+    "We Are Neutral (environmental nonprofit partner)",
+    "Pledge 1% (community member)",
+    "#UNLITTER UF (University of Florida partnership)"
+  ],
+  "press_coverage": {
+    "summary": "International media coverage across environmental, business, and local outlets.",
+    "notable_outlets": [
+      "Authority Magazine",
+      "Yahoo Finance",
+      "Causeartist",
+      "The Ecologist",
+      "World Future TV",
+      "The Independent Florida Alligator",
+      "OXMOX (Hamburg)",
+      "Deluxe Mallorca",
+      "Freudenstoff (Germany)"
+    ]
+  },
+  "annual_budget": {
+    "fiscal_year": "May 2024",
+    "total_revenue": "$143,935",
+    "revenue_breakdown": {
+      "program_services": "$104,330",
+      "contributions": "$39,605"
+    },
+    "total_expenses": "$151,470",
+    "net_assets": "$174,573",
+    "source": "IRS Form 990-EZ via ProPublica Nonprofit Explorer",
+    "note": "All key staff and board members report $0 compensation. Organization relies heavily on volunteers and interns."
+  },
+  "past_grants_received": {
+    "total_grants": 1,
+    "total_amount": "$25,000",
+    "source": "Candid/GuideStar public filing"
+  }
+}
