@@ -1,3 +1,7 @@
+import json
+from pathlib import Path
+
+
 def load_org_profile() -> dict:
     """Load Cinema Verde's organization profile from the local JSON file.
 
@@ -11,4 +15,13 @@ def load_org_profile() -> dict:
         dict containing org name, mission, programs, impact metrics,
         budget, staff info, and other verified organization data.
     """
-    raise NotImplementedError("Day 3: implement load_org_profile")
+    profile_path = Path(__file__).parent.parent / "data" / "cinema_verde_profile.json"
+
+    try:
+        with open(profile_path) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"Org profile not found at {profile_path}. "
+            "Make sure data/cinema_verde_profile.json exists."
+        )
