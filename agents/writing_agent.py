@@ -11,7 +11,13 @@ def writing_node(state: GrantPilotState) -> dict:
     """
 
     #defines what sections need to be drafted, rn hard coded but later will come from funder_reqs["required_sections"]
-    sections_to_draft = ["project_narrative", "needs_statement"]
+    sections_to_draft = [
+        "project_narrative",
+        "needs_statement",
+        "goals_objectives",
+        "evaluation_plan",
+        "org_background",
+    ]
 
     drafted_sections = {}
     for section_type in sections_to_draft:
