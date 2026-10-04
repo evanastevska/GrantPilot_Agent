@@ -2,22 +2,42 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from graph import app
-import json
 
 test_input = {
-    "funder_url": "https://www.southarts.org/grants-opportunities/southern-artist-spotlight-grant",
-    "raw_grant_text": "",
+    "funder_url": "",
+    "raw_grant_text": """Florida Division of Arts and Culture — Specific Cultural Projects (SCP) Grant
+
+The Specific Cultural Project (SCP) grant is designed to fund a single cultural project, program, exhibition or series taking place within the grant period (July 1 – June 30). Maximum request: $25,000.
+
+Eligibility:
+- Applicant organization must be either a public entity or a Florida non-profit, tax-exempt corporation as of the application deadline.
+- All current and previous grantees must be in good standing with the Division of Arts and Culture and the Department of State at the time of application.
+- Applicant must have registered with the Division of Corporations, and their status must be "active" as of the application deadline.
+- Applicant must be registered as a vendor with the Department of Financial Services.
+- Applicant must have a UEI Number.
+- Several discipline-based program areas have their own eligibility requirements.
+
+Proposal types: Arts in Education, Discipline-Based cultural or artistic projects, Underserved Cultural Community Development, Individual Artist projects.
+
+For discipline-based projects (Cinema Verde's category: Media Arts / Film):
+- Required sections: project description, timeline, budget, organizational information
+- Evaluation criteria: artistic excellence, managerial competence, accessibility, and impact on the community
+- Applications are reviewed by panelists who are practicing artists and qualified professionals. Applications are scored during panel meetings conducted by teleconference.
+- Matching requirement: dollar-for-dollar match required.
+
+Application window: June 1 – July 10 annually.
+Application system: DOSgrants.com""",
     "funder_reqs": {},
     "org_profile": {},
     "drafted_sections": {},
     "compliance_report": {},
     "revision_feedback": "",
-    "verify_manually": [],
     "revision_count": 0,
     "status": "researching",
+    "verify_manually": []
 }
 
-print("=== RUNNING FULL GRAPH — Test 3: South Arts Spotlight Grant ===\n")
+print("=== RUNNING FULL GRAPH — Test 2: Florida SCP ===\n")
 result = app.invoke(test_input)
 
 print(f"\n=== FINAL STATUS ===")
@@ -25,6 +45,7 @@ print(f"Status: {result['status']}")
 print(f"Revision count: {result['revision_count']}")
 
 print(f"\n=== EXTRACTED FUNDER REQUIREMENTS ===")
+import json
 print(json.dumps(result["funder_reqs"], indent=2))
 
 print(f"\n=== DRAFTED SECTIONS ===")

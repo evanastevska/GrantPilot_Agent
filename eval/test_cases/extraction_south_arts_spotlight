@@ -1,0 +1,57 @@
+{
+    "test_id": "south_arts_spotlight",
+    "test_type": "extraction",
+    "description": "South Arts — Southern Artist Spotlight Grant (URL path)",
+    "input": {
+        "funder_url": "https://www.southarts.org/grants-opportunities/southern-artist-spotlight-grant",
+        "raw_grant_text": ""
+    },
+    "gold_labels": {
+        "funder_name": "South Arts",
+        "deadline": "Rolling basis starting April 15, 2026; must be submitted at least 60 days prior to project start date",
+        "funding_amount": "Minimum $1,000. Maximum $8,000 for dance, $5,000 for film/music/literary/traditional/visual arts. Dollar-for-dollar cash match required. Minimum artist fee $2,000.",
+        "eligibility": [
+            "501(c)(3) nonprofit, unit of local/county/state government, or federally recognized tribal community",
+            "Based within South Arts' nine-state region (AL, FL, GA, KY, LA, MS, NC, SC, TN)",
+            "Must be a presenter/presenting organization (not a producing organization)",
+            "Engage an artist, company, or ensemble from South Arts' roster",
+            "Have a Unique Entity Identifier (UEI)",
+            "Provide a dollar-for-dollar cash match",
+            "Limited to one application per South Arts fiscal year or grant cycle",
+            "Projects must take place in applicant's state (unless special circumstances discussed with South Arts)",
+            "No fiscal agents accepted",
+            "Past non-compliant grantees must complete conversation with program director Nikki Estes"
+        ],
+        "page_word_limits": {
+            "Project Synopsis": "500 characters including spaces",
+            "Relevance + Value (project description)": "5,000 characters including spaces",
+            "Relevance + Value (primary goal/focus)": "3,000 characters including spaces",
+            "Audience, Reach + Engagement": "3,000 characters including spaces",
+            "Feasibility": "1,500 characters including spaces",
+            "Goals, Outcomes + Learning": "3,000 characters including spaces",
+            "Capacity": "2,500 characters including spaces",
+            "Strategic Contribution to the Arts Ecosystem": "2,500 characters including spaces",
+            "Supplemental document (optional)": "5 pages max"
+        },
+        "required_sections": [
+            "Project Synopsis",
+            "Relevance + Value",
+            "Audience, Reach + Engagement",
+            "Feasibility",
+            "Goals, Outcomes + Learning",
+            "Capacity",
+            "Strategic Contribution to the Arts Ecosystem"
+        ],
+        "evaluation_criteria": [
+            "Artistic Excellence of the Artist (25%)",
+            "Artistic Merit — Relevance + Value (20%)",
+            "Artistic Merit — Audience, Reach + Engagement (20%)",
+            "Artistic Merit — Feasibility (10%)",
+            "Artistic Merit — Goals, Outcomes + Learning (10%)",
+            "Artistic Merit — Capacity (10%)",
+            "Artistic Merit — Strategic Contribution to the Arts Ecosystem (5%)"
+        ],
+        "past_funded_projects": "couldn't_determine",
+        "funder_overview": "Pilot grant program supported by the NEA to amplify work with exemplary Southern artists and increase access to arts programming in Southern communities. Grants awarded first-come, first-served. Projects require a public presentation plus an educational/community engagement component."
+    }
+}

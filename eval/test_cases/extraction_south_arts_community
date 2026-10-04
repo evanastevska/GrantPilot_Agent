@@ -1,0 +1,60 @@
+{
+    "test_id": "south_arts_community",
+    "test_type": "extraction",
+    "description": "South Arts: Arts in Community Grants (URL path, mid-complexity, same org different program)",
+    "input": {
+        "funder_url": "https://www.southarts.org/grants-opportunities/arts-community-grants",
+        "raw_grant_text": ""
+    },
+    "gold_labels": {
+        "funder_name": "South Arts",
+        "deadline": "September 1, 2026, 11:59 PM ET",
+        "funding_amount": "Maximum $10,000. Dollar-for-dollar cash match required. Minimum artist fee $4,000. Minimum grant request $2,000.",
+        "eligibility": [
+            "501(c)(3) nonprofit, unit of local/county/state government, or federally recognized tribal community",
+            "Must be an arts organization",
+            "Based within South Arts' nine-state region (AL, FL, GA, KY, LA, MS, NC, SC, TN)",
+            "Have a Unique Entity Identifier (UEI)",
+            "Provide a dollar-for-dollar cash match",
+            "Guest artist must reside in South Arts region but in a different state from the host",
+            "No fiscal agents accepted",
+            "Limited to one application per South Arts fiscal year or grant cycle",
+            "No conflict of interest between artist and host organization",
+            "FY27 Arts in Community recipients not eligible for FY27 Arts in Rural Places",
+            "Past non-compliant grantees must complete conversation with program director Nikki Estes"
+        ],
+        "page_word_limits": {
+            "Project Synopsis": "500 characters including spaces",
+            "Relevance + Value (project description)": "5,000 characters including spaces",
+            "Relevance + Value (primary goal/focus)": "3,000 characters including spaces",
+            "Audience, Reach + Engagement": "3,000 characters including spaces",
+            "Feasibility": "1,500 characters including spaces",
+            "Goals, Outcomes + Learning": "3,000 characters including spaces",
+            "Artistic Excellence": "3,000 characters including spaces",
+            "Capacity": "2,500 characters including spaces",
+            "Strategic Contribution to the Arts Ecosystem": "2,500 characters including spaces",
+            "Supplemental document (optional)": "5 pages max"
+        },
+        "required_sections": [
+            "Project Synopsis",
+            "Relevance + Value",
+            "Audience, Reach + Engagement",
+            "Feasibility",
+            "Goals, Outcomes + Learning",
+            "Artistic Excellence",
+            "Capacity",
+            "Strategic Contribution to the Arts Ecosystem"
+        ],
+        "evaluation_criteria": [
+            "Artistic Excellence of the Artist (25%)",
+            "Artistic Merit — Relevance + Value (20%)",
+            "Artistic Merit — Audience, Reach + Engagement (20%)",
+            "Artistic Merit — Feasibility (10%)",
+            "Artistic Merit — Goals, Outcomes + Learning (10%)",
+            "Artistic Merit — Capacity (10%)",
+            "Artistic Merit — Strategic Contribution to the Arts Ecosystem (5%)"
+        ],
+        "past_funded_projects": "couldn't_determine",
+        "funder_overview": "Grants to support deeper engagements between Southern communities and guest artists visiting from another Southern state. Supported by the NEA. Projects require at least two public activities: a public presentation plus an educational/community engagement component."
+    }
+}

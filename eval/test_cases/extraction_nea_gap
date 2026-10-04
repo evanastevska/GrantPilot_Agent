@@ -1,0 +1,29 @@
+{
+    "test_id": "nea_gap",
+    "test_type": "extraction",
+    "description": "NEA Grants for Arts Projects (URL path, complex federal grant)",
+    "input": {
+        "funder_url": "https://www.arts.gov/grants/grants-for-arts-projects",
+        "raw_grant_text": ""
+    },
+    "gold_labels": {
+        "funder_name": "National Endowment for the Arts",
+        "deadline": "February Cycle: Part 1 Feb 12, 2026, Part 2 Feb 25, 2026. July Cycle: Part 1 July 9, 2026, Part 2 July 21, 2026.",
+        "funding_amount": "Challenge America: $10,000 only. Other GAP: $10,000 to $100,000. Local Arts Agencies subgranting: $30,000 to $150,000. 1:1 cost share required (cash and in-kind).",
+        "eligibility": [
+            "Nonprofit, tax-exempt 501(c)(3) U.S. organizations",
+            "Units of state or local government",
+            "Federally recognized tribal communities or tribes",
+            "Must have completed at least 5 years of arts programming prior to application deadline",
+            "Must have had minimum $20,000 in operating expenses in most recently completed fiscal year",
+            "Generally one application per calendar year",
+            "Not available for individuals, fiscal sponsors, commercial/for-profit enterprises, State Arts Agencies, or Regional Arts Organizations"
+        ],
+        "page_word_limits": "couldn't_determine",
+        "required_sections": "couldn't_determine",
+        "evaluation_criteria": "couldn't_determine",
+        "past_funded_projects": "couldn't_determine",
+        "funder_overview": "Principal grants category providing project-based funding for organizations. Funds arts projects of all sizes across all disciplines. Strongly encourages projects focusing on agency funding priorities."
+    },
+    "notes": "Page/word limits, required narrative sections, and evaluation criteria are all in linked PDFs (GAP Program Guidelines and discipline-specific Application Instructions). Tavily cannot fetch PDFs. The correct behavior for the agent is couldn't_determine for these fields when using the URL path only. A pasted-text test with the PDF content would test extraction of those fields."
+}

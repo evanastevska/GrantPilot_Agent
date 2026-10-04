@@ -1,0 +1,41 @@
+{
+    "test_id": "nc_arts_sustaining",
+    "test_type": "extraction",
+    "description": "North Carolina Arts Council — Sustaining Support for Arts Organizations (URL path, state arts council, operating support)",
+    "input": {
+        "funder_url": "https://www.ncarts.org/grants-resources/grants-dashboard/sustaining-support-arts-organizations",
+        "raw_grant_text": ""
+    },
+    "gold_labels": {
+        "funder_name": "North Carolina Arts Council",
+        "deadline": "March 2, 2026",
+        "funding_amount": "$7,500 to $65,000. Grant awards may not exceed 10% of the organization's cash operating expenses averaged over the past three fiscal years.",
+        "eligibility": [
+            "Arts organization with 501(c)(3) status that has creation and/or promotion of arts in its mission and dedicates at least 80% of annual programming expenses to arts activities",
+            "Must meet NC Arts Council general eligibility criteria",
+            "Average organizational expense budget of at least $75,000 over past three fiscal years",
+            "Employ at least one half-time equivalent staff person (20 hours/week, minimum wage or above)",
+            "Colleges, universities, and arts organizations that are part of another entity (such as a municipality) are not eligible",
+            "Organizations receiving Statewide Service Organizations funding or county Grassroots allotment as Designated/Provisional County Partner are generally not eligible",
+            "No fiscal agents",
+            "FY2026-27 eligible disciplines: literature, visual arts, film, and dance"
+        ],
+        "page_word_limits": "couldn't_determine",
+        "required_sections": [
+            "Overview of programs and activities for proposed grant year",
+            "Description of audiences served",
+            "Planned audience engagement activities",
+            "Key board and staff leadership",
+            "Organization's financial condition"
+        ],
+        "evaluation_criteria": [
+            "Artistic value of an organization's programs",
+            "Involvement of artists and arts professionals who are qualified, paid equitably, and reflect demographic diversity",
+            "Programs with demonstrated benefit to audiences, participants, and broader community",
+            "Strength of audience engagement and outreach strategies",
+            "Evidence of staff and board leadership and sound management practices, including financial accountability"
+        ],
+        "past_funded_projects": "couldn't_determine",
+        "funder_overview": "Provides flexible operating support funding to North Carolina arts organizations that consistently produce arts programs and services. Grants awarded on a three-year cycle by discipline with panel review. Supports salaries, artists' fees, production, travel, promotion, office expenses, and facility operation."
+    }
+}
