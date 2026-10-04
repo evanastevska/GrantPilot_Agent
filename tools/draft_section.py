@@ -1,6 +1,6 @@
 from google import genai
 import os
-import time
+from utils import call_gemini_with_retry
 
 
 #each section type gets its own template because they have different jobs.
@@ -27,7 +27,12 @@ Instructions:
   Do NOT fabricate any facts about the organization.
 - If word or page limits are specified in the funder requirements, stay within them
 - Write in a professional but human tone — avoid jargon-heavy grant boilerplate
-- Label this as a draft meant to be edited by the applicant
+- Label this as a draft meant to be edited by the applicant.
+- Do NOT include a section listing the organization's registration statuses, vendor IDs,
+  UEI numbers, or compliance with administrative requirements. If the funder requires these,
+  they are administrative items the applicant handles separately, they do not belong in the
+  project narrative. Focus on what the project IS and why it matters.
+- Do not include commentary about your own revision process or changes from prior drafts.
 
 Write the project narrative now.""",
 
@@ -50,7 +55,10 @@ Instructions:
   operation) as evidence they understand and have engaged with this problem
 - Reference real impact metrics from the org profile — never invent statistics
 - If word or page limits are specified in the funder requirements, stay within them
-- Keep the tone urgent but not melodramatic
+- Keep the tone urgent but not melodramatic.
+- Do NOT open with applicant details, funding amounts, or eligibility demonstrations. Open
+  with the problem , what need exists, who is affected, and why this work matters.
+- Do not include commentary about your own revision process or changes from prior drafts.
 
 Write the needs statement now.""",
 
@@ -72,7 +80,11 @@ Instructions:
 - Ground the goals in what the organization already does — reference existing programs
   and metrics as a baseline
 - Align goals to the funder's evaluation criteria wherever possible
-- If word or page limits are specified in the funder requirements, stay within them
+- If word or page limits are specified in the funder requirements, stay within them.
+- This section is about project goals and measurable objectives. Do NOT use this section
+  to demonstrate eligibility or list the organization's registration statuses. Stay focused
+  on what the project will accomplish and how success will be measured.
+- Do not include commentary about your own revision process or changes from prior drafts.
 
 Write the goals and objectives section now.""",
 
@@ -96,7 +108,11 @@ Instructions:
 - Reference any existing data collection the org already does (past festival metrics,
   audience data) as a foundation
 - Connect evaluation criteria back to the funder's stated priorities
-- If word or page limits are specified in the funder requirements, stay within them
+- If word or page limits are specified in the funder requirements, stay within them.
+- This section is about how PROJECT SUCCESS will be measured. Do NOT include administrative
+  compliance information, registration numbers, or eligibility demonstrations. Focus only
+  on how the organization will evaluate whether the project achieved its goals.
+- Do not include commentary about your own revision process or changes from prior drafts.
 
 Write the evaluation plan now.""",
 
@@ -122,7 +138,16 @@ Instructions:
 - Reference the leadership team's qualifications
 - Keep it factual — every claim should trace back to the org profile data.
   Do NOT fabricate accomplishments.
-- If word or page limits are specified in the funder requirements, stay within them
+- If word or page limits are specified in the funder requirements, stay within them.
+- NEVER assert facts about the organization that are not in the organization profile above.
+  If the funder requires administrative compliance (UEI registration, vendor status, good
+  standing with a specific agency), do NOT claim the organization has it unless the org
+  profile explicitly confirms it. Those are applicant action items, not claims to make
+  in the narrative.
+- If the org profile does not contain data needed to make a specific claim, omit the claim
+  entirely. Do not fabricate, assume, or infer. A shorter, honest section is better than
+  a longer one with unsupported claims.
+- Do not include commentary about your own revision process or changes from prior drafts.
 
 Write the organizational background section now.""",
 }
@@ -156,21 +181,7 @@ The following feedback was provided by the reviewer. Address these issues in you
 
     #4.gemini output is prose, not JSON
     client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
-    for attempt in range(3):
-        try:
-            response = client.models.generate_content(
-                model="gemini-3.5-flash",
-                contents=prompt,
-            )
-            break
-        except Exception as e:
-            if attempt < 2:
-                print(f"Gemini returned an error, retrying in 5 seconds... (attempt {attempt + 1}/3)")
-                time.sleep(5)
-            else:
-                raise e
-
-    content = response.text.strip()
+    content = call_gemini_with_retry(client, prompt)
 
     #5.count words and return
     return {

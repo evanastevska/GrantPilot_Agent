@@ -1,8 +1,7 @@
 from google import genai
 from tavily import TavilyClient
 import os
-import json
-import time
+from utils import call_gemini_with_retry
 
 def research_funder(
     funder_url: str | None = None,
@@ -87,25 +86,5 @@ Text to analyze:
 Return ONLY the JSON object, no other text."""
 
     client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
-    for attempt in range(3):
-        try:
-            response = client.models.generate_content(
-                model="gemini-3.5-flash",
-                contents=extraction_prompt,
-            )
-            break
-        except Exception as e:
-            if attempt < 2:
-                print(f"Gemini returned an error, retrying in 5 seconds... (attempt {attempt + 1}/3)")
-                time.sleep(5)
-            else:
-                raise e
-
-    #Gemini sometimes wraps JSON in markdown code fences
-    response_text = response.text.strip()
-    if response_text.startswith("```"):
-        response_text = response_text.split("\n", 1)[1]
-        response_text = response_text.rsplit("```", 1)[0].strip()
-
-    return json.loads(response_text)
+    return call_gemini_with_retry(client, extraction_prompt, parse_json=True)
 

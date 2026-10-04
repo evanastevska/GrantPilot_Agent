@@ -21,3 +21,4 @@ class GrantPilotState(TypedDict):
     revision_feedback: str #specific feedback for the Writer to act on
     revision_count: int #capped at 2 conditional edge checks this
     status: str #researching, writing, reviewing, approved, max_revisions_reached
+    verify_manually: list #items only the applicant can resolve

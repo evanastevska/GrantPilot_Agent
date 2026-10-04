@@ -1,27 +1,18 @@
 from google import genai
+from utils import call_gemini_with_retry
 import os
 import json
-import time
 
-#PROGRAMMATIC CHECK
+
 def _check_word_counts(drafted_sections: dict, funder_reqs: dict) -> list:
-    """Compare each section's word count against funder limits.
-    
-    funder_reqs["page_word_limits"] looks like: {"project narrative": "max 3 pages"}
-    Approximate 350 words per page when the limit is in pages.
-    
-    Returns a list of dicts, one per section that HAS a limit:
-        {"section": str, "word_count": int, "limit": int, "status": "within_limit" | "over_limit"}
-    """
+    """Compare each section's word count against funder limits."""
     results = []
-
     page_word_limits = funder_reqs.get("page_word_limits", {})
 
     if page_word_limits == "couldn't_determine":
         return []
 
     for section_name, limit_string in page_word_limits.items():
-        #parse the number out of strings like "max 3 pages"
         limit_words = None
         for word in limit_string.split():
             try:
@@ -37,7 +28,6 @@ def _check_word_counts(drafted_sections: dict, funder_reqs: dict) -> list:
         if limit_words is None:
             continue
 
-        #normalize "project narrative" → "project_narrative" to match drafted_sections keys
         normalized = section_name.replace(" ", "_").lower()
 
         if normalized in drafted_sections:
@@ -53,20 +43,13 @@ def _check_word_counts(drafted_sections: dict, funder_reqs: dict) -> list:
 
 
 def _check_deadline(funder_reqs: dict) -> str | None:
-    """Surface the deadline so the user sees it in the report.
-    
-    This isn't a pass/fail check just pulls the deadline out
-    of funder_reqs so it's visible in the compliance report.
-    
-    Returns the deadline string, or None if couldn't_determine.
-    """
+    """Surface the deadline so the user sees it in the report."""
     deadline = funder_reqs.get("deadline", "couldn't_determine")
     if deadline == "couldn't_determine":
         return None
     return deadline
 
 
-#LLM CHECK
 COMPLIANCE_EVAL_PROMPT = """You are a skeptical grant compliance reviewer. Your job is to find gaps and problems, not to praise the draft.
 
 You are evaluating a grant application draft against the funder's requirements.
@@ -88,6 +71,7 @@ Evaluate the draft and return a JSON object with exactly these fields:
             "required_section": "name from funder requirements",
             "status": "covered" | "missing" | "not_a_draft_section",
             "matched_draft_section": "key from drafted sections that covers this, or null",
+            "fixable_by": "writer" | "applicant",
             "notes": "brief explanation"
         }}
     ],
@@ -96,6 +80,7 @@ Evaluate the draft and return a JSON object with exactly these fields:
             "criterion": "criterion from funder evaluation criteria",
             "addressed": true | false,
             "sections_addressing": ["which draft sections address this"],
+            "fixable_by": "writer" | "applicant",
             "notes": "how it's addressed, or what's missing"
         }}
     ],
@@ -103,6 +88,7 @@ Evaluate the draft and return a JSON object with exactly these fields:
         {{
             "criterion": "eligibility requirement from funder",
             "demonstrated": true | false,
+            "fixable_by": "writer" | "applicant",
             "notes": "how the draft demonstrates eligibility, or what's missing"
         }}
     ],
@@ -110,7 +96,8 @@ Evaluate the draft and return a JSON object with exactly these fields:
         {{
             "claim": "a specific claim made in the draft",
             "section": "which section it appears in",
-            "issue": "why it's unsupported (not in org profile, or contradicts org data)"
+            "fixable_by": "writer" | "applicant",
+            "issue": "why it's unsupported"
         }}
     ]
 }}
@@ -120,12 +107,19 @@ Rules:
 - For criteria_coverage: "addressed" means the draft SUBSTANTIVELY engages with the criterion, not just mentions the word.
 - For eligibility_coverage: check whether the draft demonstrates the organization meets each eligibility requirement, using evidence from the org profile.
 - For unsupported_claims: only flag claims that are NOT supported by the organization profile data. Don't flag reasonable framing or standard grant language, only factual claims that can't be traced back to the org profile.
+- For eligibility_coverage: when eligibility lists multiple ALTERNATIVE paths (e.g. "nonprofits OR government units OR tribal communities"), meeting ANY ONE of them satisfies the requirement. Only flag the ones the applicant is actually claiming to meet. Do not flag alternative paths the applicant doesn't need.
+
+
+CRITICAL — fixable_by rules:
+- "writer" means the problem is in the DRAFT and can be fixed by rewriting. Examples: a criterion isn't addressed, a section is over the word limit, the writer made a claim that contradicts or goes beyond the org profile data, a required section that the writer could draft.
+- "applicant" means the problem is in the DATA — the org profile simply does not contain the information needed. No amount of rewriting will fix it. Examples: funder requires a UEI number but the org profile has none, funder requires vendor registration but the profile doesn't document it, a required deliverable the writer can't generate (actual budget numbers, letters of support).
+- When in doubt: if the org profile contains the information and the writer just didn't use it, that's "writer". If the org profile does not contain the information at all, that's "applicant".
+
 - Return ONLY the JSON object, no other text."""
 
 
 def _run_llm_checks(drafted_sections: dict, funder_reqs: dict, org_profile: dict) -> dict:
     """Use Gemini to evaluate draft quality against funder requirements."""
-
     prompt = COMPLIANCE_EVAL_PROMPT.format(
         funder_reqs=str(funder_reqs),
         org_profile=str(org_profile),
@@ -133,26 +127,7 @@ def _run_llm_checks(drafted_sections: dict, funder_reqs: dict, org_profile: dict
     )
 
     client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
-    for attempt in range(3):
-        try:
-            response = client.models.generate_content(
-                model="gemini-3.5-flash",
-                contents=prompt,
-            )
-            break
-        except Exception as e:
-            if attempt < 2:
-                print(f"Gemini returned an error, retrying in 5 seconds... (attempt {attempt + 1}/3)")
-                time.sleep(5)
-            else:
-                raise e
-
-    response_text = response.text.strip()
-    if response_text.startswith("```"):
-        response_text = response_text.split("\n", 1)[1]
-        response_text = response_text.rsplit("```", 1)[0].strip()
-
-    return json.loads(response_text)
+    return call_gemini_with_retry(client, prompt, parse_json=True)
 
 
 def check_compliance(
@@ -167,50 +142,44 @@ def check_compliance(
     #LLM checks
     llm_checks = _run_llm_checks(drafted_sections, funder_reqs, org_profile)
 
-    #build revision feedback from ALL checks
-    feedback_parts = []
+    #split findings into writer-fixable vs applicant-must-verify
+    revision_parts = []     #writer can fix
+    verify_parts = []       #only applicant can fix
 
-    #word count issues
+    #word count issues always writer-fixable
     for wc in word_count_results:
         if wc["status"] == "over_limit":
             over_by = wc["word_count"] - wc["limit"]
-            feedback_parts.append(f"{wc['section']} exceeds word limit by {over_by} words")
+            revision_parts.append(f"{wc['section']} exceeds word limit by {over_by} words")
 
-    #missing sections (from LLM)
-    missing_sections = [
-        s for s in llm_checks.get("sections_coverage", [])
-        if s["status"] == "missing"
-    ]
-    if missing_sections:
-        names = [s["required_section"] for s in missing_sections]
-        feedback_parts.append(f"Missing required sections: {', '.join(names)}")
+    #missing sections
+    for s in llm_checks.get("sections_coverage", []):
+        if s["status"] == "missing":
+            target = revision_parts if s.get("fixable_by") == "writer" else verify_parts
+            target.append(f"Missing required section: {s['required_section']} — {s['notes']}")
 
     #unaddressed evaluation criteria
-    missed_criteria = [
-        c for c in llm_checks.get("criteria_coverage", [])
-        if not c["addressed"]
-    ]
-    for c in missed_criteria:
-        feedback_parts.append(f"Evaluation criterion not addressed: {c['criterion']} — {c['notes']}")
+    for c in llm_checks.get("criteria_coverage", []):
+        if not c["addressed"]:
+            target = revision_parts if c.get("fixable_by") == "writer" else verify_parts
+            target.append(f"Evaluation criterion not addressed: {c['criterion']} — {c['notes']}")
 
     #undemonstrated eligibility
-    missed_eligibility = [
-        e for e in llm_checks.get("eligibility_coverage", [])
-        if not e["demonstrated"]
-    ]
-    for e in missed_eligibility:
-        feedback_parts.append(f"Eligibility not demonstrated: {e['criterion']} — {e['notes']}")
+    for e in llm_checks.get("eligibility_coverage", []):
+        if not e["demonstrated"]:
+            target = revision_parts if e.get("fixable_by") == "writer" else verify_parts
+            target.append(f"Eligibility not demonstrated: {e['criterion']} — {e['notes']}")
 
     #unsupported claims
-    unsupported = llm_checks.get("unsupported_claims", [])
-    for u in unsupported:
-        feedback_parts.append(f"Unsupported claim in {u['section']}: {u['claim']} — {u['issue']}")
+    for u in llm_checks.get("unsupported_claims", []):
+        target = revision_parts if u.get("fixable_by") == "writer" else verify_parts
+        target.append(f"Unsupported claim in {u['section']}: {u['claim']} — {u['issue']}")
 
-    #determine overall status
-    if feedback_parts:
+    #determine overall status based ONLY on writer-fixable issues
+    if revision_parts:
         overall_status = "needs_revision"
         revision_type = "writing"
-        revision_feedback = ". ".join(feedback_parts) + "."
+        revision_feedback = ". ".join(revision_parts) + "."
     else:
         overall_status = "approved"
         revision_type = None
@@ -225,4 +194,5 @@ def check_compliance(
         "overall_status": overall_status,
         "revision_type": revision_type,
         "revision_feedback": revision_feedback,
+        "verify_manually": verify_parts,
     }
