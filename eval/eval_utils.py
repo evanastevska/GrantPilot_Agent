@@ -267,7 +267,7 @@ DRAFT:
 Score this draft on each dimension:
 
 1. Relevance to funder priorities (1-5): Does it address specific funder evaluation criteria, or is it generic boilerplate that could apply to any funder?
-2. Org data grounding (1-5): Does it use specific facts/numbers from the org profile, or make vague claims?
+2. Org data grounding (1-5): List every factual claim the draft makes about the organization: numbers, partnerships, achievements, history, attendee counts, dollar amounts. For EACH claim, check whether it appears in the org profile. If ANY claim cannot be traced to the org profile, score 2 or below. Score 4-5 ONLY if every single factual claim is verified in the profile.
 3. Section structure (1-5): Does it follow expected grant section conventions for this section type?
 
 Return ONLY this JSON:

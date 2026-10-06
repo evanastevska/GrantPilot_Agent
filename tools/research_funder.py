@@ -66,6 +66,11 @@ Rules:
 - Extract ONLY information explicitly stated in the text.
 - If a field cannot be determined from the text, set its value to exactly "couldn't_determine".
 - Do not guess, infer, or make assumptions.
+- For required_sections: extract the most specific, individually named sections. If a parent category has named sub-items, list the sub-items, not the parent category.
+- For evaluation_criteria: list each individually named criterion. If sub-criteria are named, list those separately, not just the parent category.
+- For eligibility: include restrictions and limitations: fiscal agent rules, application limits per cycle, conflict of interest policies, residency requirements, deadlines for status corrections.
+- Return valid JSON with exactly these fields:
+- Do not guess, infer, or make assumptions.
 - Return valid JSON with exactly these fields:
 
 {{
@@ -77,7 +82,7 @@ Rules:
     "required_sections": ["section 1", "section 2"] or "couldn't_determine",
     "evaluation_criteria": ["criterion 1", "criterion 2"] or "couldn't_determine",
     "past_funded_projects": ["project 1", "project 2"] or "couldn't_determine",
-    "funder_overview": "Brief summary of the funder's mission and priorities"
+    "funder_overview": "What is distinctive about this specific grant program? Include: program type, award process, and key requirements that make it different from other grants"
 }}
 
 Text to analyze:

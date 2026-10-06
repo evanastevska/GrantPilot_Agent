@@ -106,7 +106,9 @@ Rules:
 - For sections_coverage: "not_a_draft_section" means the requirement isn't something you draft (like "letters of support" or "budget spreadsheet"), it's a supporting document.
 - For criteria_coverage: "addressed" means the draft SUBSTANTIVELY engages with the criterion, not just mentions the word.
 - For eligibility_coverage: check whether the draft demonstrates the organization meets each eligibility requirement, using evidence from the org profile.
-- For unsupported_claims: only flag claims that are NOT supported by the organization profile data. Don't flag reasonable framing or standard grant language, only factual claims that can't be traced back to the org profile.
+- For unsupported_claims: only flag FACTUAL CLAIMS about the organization's past or present that contradict or go beyond the org profile data.
+- IMPORTANT: forward-looking proposal language is NOT a factual claim. Phrases like "proposes to," "will expand," "plans to," "seeks to," "aims to," "intends to" describe what the applicant wants to do in the future. Do NOT flag these. Only flag statements that assert something the organization HAS DONE, HAS ACHIEVED, or CURRENTLY IS, and that assertion is not supported by the org profile.
+- Pay special attention to numeric claims: attendee counts, dollar amounts, years of operation, number of events, partnership counts. If the org profile has no data backing a specific number claimed in the draft, flag it as unsupported.
 - For eligibility_coverage: when eligibility lists multiple ALTERNATIVE paths (e.g. "nonprofits OR government units OR tribal communities"), meeting ANY ONE of them satisfies the requirement. Only flag the ones the applicant is actually claiming to meet. Do not flag alternative paths the applicant doesn't need.
 
 
