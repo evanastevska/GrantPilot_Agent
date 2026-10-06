@@ -1,0 +1,42 @@
+{
+  "test_id": "clean_baseline",
+  "test_type": "compliance",
+  "description": "Clean draft: under word limit, all required sections present, all claims grounded in org profile, all evaluation criteria addressed. Should pass compliance with no writer-fixable issues. Eligibility items like UEI/vendor registration may flag as applicant-fixable (verify_manually), which is expected.",
+  "funder_reqs": {
+    "funder_name": "Florida Department of State, Division of Arts and Culture",
+    "deadline": "June 1, 2027",
+    "funding_amount": "up to $25,000",
+    "eligibility": [
+      "Applicant organization must be either a public entity or a Florida non-profit, tax-exempt corporation as of the application deadline",
+      "All organizations must have at least one year of completed arts and cultural programming and must be able to provide their last completed fiscal year's operating budget",
+      "Applicant must have registered with the Division of Corporations and their status must be active",
+      "Applicant must be registered as a vendor with the Department of Financial Services and provide a copy of their Florida Substitute W-9 form",
+      "Applicant must provide their UEI number at the time of application",
+      "Applicant must provide a copy of their most recently completed Federal 990 form"
+    ],
+    "page_word_limits": {
+      "project narrative": "max 3 pages"
+    },
+    "required_sections": [
+      "project narrative"
+    ],
+    "evaluation_criteria": [
+      "Quality of Offerings (up to 40 points)",
+      "Reach and Impact (up to 35 points)",
+      "Track Record (up to 20 points)",
+      "History and Heritage Promotion (5 points)"
+    ]
+  },
+  "org_profile": "LOAD_FROM_FILE",
+  "drafted_sections": {
+    "project_narrative": {
+      "section_type": "project_narrative",
+      "content": "Cinema Verde, the Gainesville Environmental Film and Arts Festival, proposes a Specific Cultural Project to expand its 2026 Annual Environmental Film Festival programming with enhanced community engagement activities, educational workshops, and filmmaker-led discussions that deepen public understanding of environmental issues through the arts.\n\nFounded in 2010, Cinema Verde has hosted 16 annual environmental film festivals, supporting over 200 filmmakers from more than 50 countries. The organization's mission is to provide environmental education to the public through film, arts, workshops, events, tours, and other forums, striving to increase awareness of environmental practices that enhance public health and improve quality of life.\n\nThe proposed project centers on a multi-venue festival experience across Gainesville's established cultural venues, including Cypress and Grove Brewing Company, Heartwood Soundstage, the Hippodrome State Theatre, the Historic Depot Station, and the Paramount Plaza Hotel. Each venue will host curated film screenings paired with facilitated discussions led by attending filmmakers.\n\nQuality of Offerings\n\nCinema Verde's programming quality is rooted in its curatorial process, which draws from an international pool of independent environmental filmmakers. Over 16 festivals, the organization has built relationships with filmmakers from more than 50 countries, resulting in programming that spans documentary, narrative, and experimental approaches to environmental storytelling. The festival's founding director, Trish Riley, is a national award-winning investigative and environmental journalist and author whose published works include The Complete Idiot's Guide to Green Living and The Complete Idiot's Guide to Greening Your Business, both published by Penguin. The proposed project will enhance quality by adding structured post-screening discussions and partnerships with established community organizations including Keep Alachua County Beautiful and We Are Neutral.\n\nReach and Impact\n\nCinema Verde's reach extends beyond Gainesville's local community. The festival has received media coverage from outlets including Authority Magazine, Yahoo Finance, Causeartist, The Ecologist, and World Future TV. The project will leverage Cinema Verde's existing streaming platform at cinemaverde.org and its Roku channel, which provides free year-round access to curated environmental films. Community events including Earth Day celebrations and community cleanups such as the Ashley Creek cleanup will provide hands-on environmental engagement. The UNLITTER UF initiative and the Sustainable Business Spotlight program further extend reach to college students and the local business community.\n\nTrack Record\n\nCinema Verde operates as a 501(c)(3) public charity and Florida nonprofit corporation. In its most recently completed fiscal year, the organization reported total revenue of $143,935 and total expenses of $151,470, maintaining net assets of $174,573. The organization operates with a small, dedicated team of under 10 staff members. All key staff and board members report zero compensation, reflecting the organization's commitment to directing resources toward programming. Cinema Verde has previously received one grant totaling $25,000. The organization holds solicitation license CH33749 and maintains tax-exempt status under EIN 27-3021913.\n\nHistory and Heritage Promotion\n\nThe proposed project promotes Florida's cultural heritage by showcasing the state's role in environmental arts and education. Over 16 years, Cinema Verde has established Gainesville as a destination for international environmental filmmaking. The festival's use of historic venues including the Hippodrome State Theatre roots programming in Florida's arts heritage while addressing contemporary environmental concerns.",
+      "word_count": 512
+    }
+  },
+  "expected": {
+    "should_flag": [],
+    "should_not_flag": ["word_count_over_limit", "missing_section", "unsupported_claims", "unaddressed_criterion"]
+  }
+}
