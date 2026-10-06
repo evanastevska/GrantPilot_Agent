@@ -173,7 +173,7 @@ def check_compliance(
     #unsupported claims
     for u in llm_checks.get("unsupported_claims", []):
         target = revision_parts if u.get("fixable_by") == "writer" else verify_parts
-        target.append(f"Unsupported claim in {u['section']}: {u['claim']} — {u['issue']}")
+        target.append(f"Unsupported claim in {u['section']}: {u.get('claim', '?')} — {u.get('issue', u.get('reason', ''))}")
 
     #determine overall status based ONLY on writer-fixable issues
     if revision_parts:
