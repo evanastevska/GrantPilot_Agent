@@ -258,20 +258,27 @@ SECTION TYPE: {section_type}
 FUNDER REQUIREMENTS:
 {json.dumps(funder_reqs, indent=2)}
 
-ORGANIZATION PROFILE (verified facts the draft should draw from):
+ORGANIZATION PROFILE (these are the ONLY verified facts about the organization):
 {json.dumps(org_profile, indent=2)}
 
 DRAFT:
 {draft_content}
 
-Score this draft on each dimension:
+STEP 1 — CLAIMS AUDIT (do this BEFORE scoring):
+List every factual claim the draft makes about the organization — numbers, dollar amounts, attendee counts, partnerships, achievements, years of operation. For EACH claim, write whether it appears in the ORGANIZATION PROFILE above. Mark each as SUPPORTED or UNSUPPORTED.
+
+STEP 2 — Score the draft:
 
 1. Relevance to funder priorities (1-5): Does it address specific funder evaluation criteria, or is it generic boilerplate that could apply to any funder?
-2. Org data grounding (1-5): List every factual claim the draft makes about the organization: numbers, partnerships, achievements, history, attendee counts, dollar amounts. For EACH claim, check whether it appears in the org profile. If ANY claim cannot be traced to the org profile, score 2 or below. Score 4-5 ONLY if every single factual claim is verified in the profile.
+2. Org data grounding (1-5): Based on your claims audit above. If ANY claim is UNSUPPORTED by the org profile, score 2 or below. Score 4-5 ONLY if every claim is SUPPORTED.
 3. Section structure (1-5): Does it follow expected grant section conventions for this section type?
 
-Return ONLY this JSON:
+Return ONLY this JSON (include the claims_audit):
 {{
+    "claims_audit": [
+        {{"claim": "...", "in_profile": true/false}},
+        {{"claim": "...", "in_profile": true/false}}
+    ],
     "relevance_to_funder": {{"score": 3, "justification": "..."}},
     "org_data_grounding": {{"score": 4, "justification": "..."}},
     "section_structure": {{"score": 3, "justification": "..."}},
@@ -279,7 +286,6 @@ Return ONLY this JSON:
 }}"""
 
     return call_judge(client, prompt, parse_json=True)
-
 
 #print helpers
 
