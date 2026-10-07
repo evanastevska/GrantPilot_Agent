@@ -136,6 +136,17 @@ def run():
                 all_scores[dimension].append(score if isinstance(score, (int, float)) else 0)
                 print_score(f"{dimension}: {score}/5", justification[:100])
 
+            audit = rubric.get("claims_audit", [])
+            if audit:
+                for item in audit:
+                    status = item.get("status", item.get("in_profile", "?"))
+                    if status is True:
+                        status = "SUPPORTED"
+                    elif status is False:
+                        status = "UNSUPPORTED"
+                    icon = {"SUPPORTED": "✅", "UNSUPPORTED": "❌", "FLAGGED": "🏳️", "CONTEXT": "🌐"}.get(status, "❓")
+                    print(f"        {icon} [{status}] {item.get('claim', '?')}")
+
             if rubric.get("overall_notes"):
                 print_info(f"Notes: {rubric['overall_notes'][:200]}")
 

@@ -75,7 +75,7 @@ def call_judge(client, prompt: str, parse_json: bool = False):
     for attempt, delay in enumerate(delays):
         try:
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0,
             )
@@ -265,19 +265,31 @@ DRAFT:
 {draft_content}
 
 STEP 1 — CLAIMS AUDIT (do this BEFORE scoring):
-List every factual claim the draft makes about the organization — numbers, dollar amounts, attendee counts, partnerships, achievements, years of operation. For EACH claim, write whether it appears in the ORGANIZATION PROFILE above. Mark each as SUPPORTED or UNSUPPORTED.
+List every factual claim the draft makes about the organization — numbers, dollar amounts, attendee counts, partnerships, achievements, years of operation. For EACH claim, mark it as:
+- SUPPORTED: the claim appears in the ORGANIZATION PROFILE above
+- UNSUPPORTED: the claim asserts something about the organization that is NOT in the profile
+- FLAGGED: the claim contains a placeholder like "[Applicant to verify baseline data]" or "[Applicant to supply historical data]" — this is CORRECT behavior, not an error
+- CONTEXT: the claim is about the world, the environment, the community, or the field — NOT about the organization itself. These are not grounding claims.
+- CHARACTERIZATION: the claim is subjective framing, interpretive language, or rhetorical prose — not a specific factual assertion about the organization's data, metrics, or achievements. Examples: "served as a critical bridge," "robust pipeline," "premier festival." These are normal grant writing style, not data claims.
+- TARGET: the claim sets a forward-looking goal, benchmark, or performance target for the proposed project — not an assertion about what the organization has already done. Examples: "target of 35 films," "minimum of 10 Q&A sessions," "85% satisfaction rating." These are aspirational, not factual.
+
+Only UNSUPPORTED claims count against the grounding score. FLAGGED and CONTEXT claims do not.
 
 STEP 2 — Score the draft:
 
 1. Relevance to funder priorities (1-5): Does it address specific funder evaluation criteria, or is it generic boilerplate that could apply to any funder?
-2. Org data grounding (1-5): Based on your claims audit above. If ANY claim is UNSUPPORTED by the org profile, score 2 or below. Score 4-5 ONLY if every claim is SUPPORTED.
+2. Org data grounding (1-5): Based on your claims audit above. Count only UNSUPPORTED claims — ignore FLAGGED, CONTEXT, CHARACTERIZATION, and TARGET claims. If ANY claim is UNSUPPORTED, score 2 or below. Score 4-5 if every org-specific factual claim is either SUPPORTED or correctly FLAGGED.
 3. Section structure (1-5): Does it follow expected grant section conventions for this section type?
 
 Return ONLY this JSON (include the claims_audit):
 {{
     "claims_audit": [
-        {{"claim": "...", "in_profile": true/false}},
-        {{"claim": "...", "in_profile": true/false}}
+        {{"claim": "...", "status": "SUPPORTED"}},
+        {{"claim": "...", "status": "UNSUPPORTED"}},
+        {{"claim": "...", "status": "FLAGGED"}},
+        {{"claim": "...", "status": "CONTEXT"}},
+        {{"claim": "...", "status": "CHARACTERIZATION"}},
+        {{"claim": "...", "status": "TARGET"}}
     ],
     "relevance_to_funder": {{"score": 3, "justification": "..."}},
     "org_data_grounding": {{"score": 4, "justification": "..."}},

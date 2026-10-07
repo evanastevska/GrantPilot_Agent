@@ -51,7 +51,7 @@ print(json.dumps(result["funder_reqs"], indent=2))
 print(f"\n=== DRAFTED SECTIONS ===")
 for section_type, section in result["drafted_sections"].items():
     print(f"\n--- {section_type} ({section['word_count']} words) ---")
-    print(section["content"][:500])
+    print(section["content"])
     print("..." if len(section["content"]) > 500 else "")
 
 print(f"\n=== COMPLIANCE REPORT ===")

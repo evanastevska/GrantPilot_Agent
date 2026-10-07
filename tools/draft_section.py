@@ -27,6 +27,11 @@ Instructions:
   Do NOT fabricate any facts about the organization.
 - If word or page limits are specified in the funder requirements, stay within them
 - Write in a professional but human tone — avoid jargon-heavy grant boilerplate
+- Do NOT fabricate specific budget line items or dollar breakdowns unless they appear in
+  the org profile. If the funder requires a budget summary, state the total request and
+  match amounts from the funder requirements, and flag detailed line items as
+  "[Applicant to supply budget breakdown]". The org profile contains revenue and expense
+  totals, not itemized project budgets.
 - Label this as a draft meant to be edited by the applicant.
 - Do NOT include a section listing the organization's registration statuses, vendor IDs,
   UEI numbers, or compliance with administrative requirements. If the funder requires these,
@@ -73,18 +78,29 @@ FUNDER REQUIREMENTS:
 ORGANIZATION PROFILE:
 {org_profile}
 
-Instructions:
+Before writing, complete these steps in order:
+
+STEP 1 — DATA INVENTORY:
+Scan the organization profile above and list every concrete metric, number, program name,
+partnership, and data point that could support goals or objectives. If the profile contains
+no baseline metrics (attendance counts, dollar amounts, number of events, participants
+served), state that explicitly.
+
+STEP 2 — DRAFT:
+Using ONLY the data you inventoried in Step 1, write the goals and objectives section:
 - State 2-3 clear goals for the project
-- Under each goal, list 2-3 measurable objectives with realistic timelines
-- Objectives should be specific enough to evaluate later (numbers, dates, deliverables)
+- Under each goal, list 2-3 objectives with realistic timelines
+- Where Step 1 found baseline metrics, use them to make objectives measurable
+- Where Step 1 found NO baseline metrics, state the objective qualitatively and flag it:
+  "[Applicant to verify baseline data]". Do NOT invent numbers to fill the gap.
 - Ground the goals in what the organization already does — reference existing programs
-  and metrics as a baseline
+  from the org profile
 - Align goals to the funder's evaluation criteria wherever possible
-- If word or page limits are specified in the funder requirements, stay within them.
+- If word or page limits are specified in the funder requirements, stay within them
 - This section is about project goals and measurable objectives. Do NOT use this section
-  to demonstrate eligibility or list the organization's registration statuses. Stay focused
-  on what the project will accomplish and how success will be measured.
-- Do not include commentary about your own revision process or changes from prior drafts.
+  to demonstrate eligibility or list the organization's registration statuses
+- Do not include the data inventory in your output. Do not include commentary about your
+  own revision process or changes from prior drafts. Output only the final section.
 
 Write the goals and objectives section now.""",
 
@@ -100,19 +116,31 @@ FUNDER REQUIREMENTS:
 ORGANIZATION PROFILE:
 {org_profile}
 
-Instructions:
+Before writing, complete these steps in order:
+
+STEP 1 — DATA INVENTORY:
+Scan the organization profile above and list every concrete metric, data point, and
+existing data collection method the organization profile documents (past festival metrics,
+audience surveys, attendance records, partner reports). If the profile contains no specific
+historical metrics, state that explicitly.
+
+STEP 2 — DRAFT:
+Using ONLY the data you inventoried in Step 1, write the evaluation plan:
 - Describe how each major objective will be measured
-- Include both quantitative metrics (attendance numbers, films screened, participants
-  served) and qualitative methods (surveys, interviews, case studies)
+- Where Step 1 found existing metrics or data collection methods, reference them as
+  the foundation for evaluation
+- Where Step 1 found NO historical metrics, describe the evaluation methodology
+  (what you will track, how, and when) without fabricating baseline numbers, and flag:
+  "[Applicant to supply historical data]"
+- Include qualitative methods (surveys, interviews, case studies) alongside any
+  quantitative metrics that are actually supported by the org profile
 - Specify who will collect the data and when
-- Reference any existing data collection the org already does (past festival metrics,
-  audience data) as a foundation
 - Connect evaluation criteria back to the funder's stated priorities
-- If word or page limits are specified in the funder requirements, stay within them.
-- This section is about how PROJECT SUCCESS will be measured. Do NOT include administrative
-  compliance information, registration numbers, or eligibility demonstrations. Focus only
-  on how the organization will evaluate whether the project achieved its goals.
-- Do not include commentary about your own revision process or changes from prior drafts.
+- If word or page limits are specified in the funder requirements, stay within them
+- This section is about how PROJECT SUCCESS will be measured. Do NOT include
+  administrative compliance information, registration numbers, or eligibility demonstrations
+- Do not include the data inventory in your output. Do not include commentary about your
+  own revision process or changes from prior drafts. Output only the final section.
 
 Write the evaluation plan now.""",
 
