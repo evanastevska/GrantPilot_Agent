@@ -5,54 +5,154 @@ Creates a Google Doc with three sections:
 2. Draft Sections — each labeled as a draft
 3. Compliance Notes — what passed, what needs manual verification
 
-Auth: uses a service account JSON key (GOOGLE_SERVICE_ACCOUNT_FILE env var).
-The doc is created in the service account's Drive and shared with
-GOOGLE_DOCS_SHARE_EMAIL if set.
+Auth: OAuth2 desktop flow. On first run, opens a browser for Google login.
+Saves the token to token.json so you don't have to re-login every time.
+Handles token refresh automatically.
 
 Requirements:
-  pip install google-api-python-client google-auth
+  pip install google-api-python-client google-auth google-auth-oauthlib
   - Google Cloud project with Docs API + Drive API enabled
-  - Service account key JSON downloaded
-  - Set GOOGLE_SERVICE_ACCOUNT_FILE=path/to/key.json in .env
-  - Optionally set GOOGLE_DOCS_SHARE_EMAIL=trish@example.com
+  - OAuth consent screen configured and published (testing mode tokens
+    expire after 7 days — published mode tokens last indefinitely)
+  - OAuth client ID (Desktop app type) — download as client_secret.json
+  - Optionally set GOOGLE_DRIVE_FOLDER_ID in .env to put docs in a folder
+  - Optionally set GOOGLE_DOCS_SHARE_EMAIL in .env to auto-share
 """
 
+
 import os
-from google.oauth2 import service_account
+import json
+import time
+from pathlib import Path
+import requests as http_requests
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
 
-# ---------- auth ----------
+#auth
 
 SCOPES = [
     "https://www.googleapis.com/auth/documents",
     "https://www.googleapis.com/auth/drive",
 ]
 
+#token is saved next to client_secret.json (project root)
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_TOKEN_PATH = _PROJECT_ROOT / "token.json"
+_CLIENT_SECRET_PATH = _PROJECT_ROOT / "client_secret.json"
 
-def _get_credentials():
-    """Load service account credentials from the JSON key file."""
-    sa_file = os.environ.get("GOOGLE_SERVICE_ACCOUNT_FILE")
-    if not sa_file:
-        raise EnvironmentError(
-            "Set GOOGLE_SERVICE_ACCOUNT_FILE to the path of your "
-            "service account JSON key."
-        )
-    return service_account.Credentials.from_service_account_file(
-        sa_file, scopes=SCOPES
+
+def _manual_flow_login():
+    """OAuth2 flow for remote environments like Codespaces.
+
+    Opens a Google sign-in URL. After granting access, the browser
+    redirects to localhost which fails — but the authorization code
+    is in the URL bar. User copies the full URL and pastes it back.
+    """
+    with open(_CLIENT_SECRET_PATH) as f:
+        client_info = json.load(f)["installed"]
+
+    client_id = client_info["client_id"]
+    client_secret = client_info["client_secret"]
+    redirect_uri = "http://localhost:8090"
+
+    import urllib.parse
+    auth_url = (
+        "https://accounts.google.com/o/oauth2/v2/auth?"
+        + urllib.parse.urlencode({
+            "client_id": client_id,
+            "redirect_uri": redirect_uri,
+            "response_type": "code",
+            "scope": " ".join(SCOPES),
+            "access_type": "offline",
+            "prompt": "consent",
+        })
+    )
+
+    print(f"\n1. Open this URL in your browser:\n{auth_url}\n")
+    print("2. Sign in and grant access.")
+    print("3. You'll get a 'localhost refused to connect' error — that's expected.")
+    print("4. Copy the ENTIRE URL from your browser's address bar.\n")
+
+    redirect_url = input("Paste the full URL here: ")
+
+    #pull the authorization code out of the URL
+    parsed = urllib.parse.urlparse(redirect_url)
+    code = urllib.parse.parse_qs(parsed.query)["code"][0]
+
+    #exchange the code for tokens
+    token_resp = http_requests.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": redirect_uri,
+        },
+    )
+    token_resp.raise_for_status()
+    token_data = token_resp.json()
+
+    return Credentials(
+        token=token_data["access_token"],
+        refresh_token=token_data.get("refresh_token"),
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=client_id,
+        client_secret=client_secret,
+        scopes=SCOPES,
     )
 
 
-# ---------- document building helpers ----------
+def _get_credentials():
+    """Load or create OAuth2 credentials with automatic refresh.
 
-# Google Docs batchUpdate works by inserting text at character indices and
-# then applying formatting.  The simplest pattern for building a new doc:
-#   1. Build the full plain text and track where each "span" starts/ends.
-#   2. Insert all the text in one request.
-#   3. Apply paragraph styles (headings) and character styles (bold) as
-#      separate requests referencing the tracked indices.
-#
-# Indices are 1-based (index 1 = start of the document body).
+    Flow:
+    1. If token.json exists, load it.
+    2. If the token is expired, refresh it automatically.
+    3. If refresh fails or no token.json exists, run the device
+       flow (prints a URL + code to the terminal).
+
+    Returns:
+        google.oauth2.credentials.Credentials
+    """
+    creds = None
+
+    #1. try loading existing token
+    if _TOKEN_PATH.exists():
+        creds = Credentials.from_authorized_user_file(str(_TOKEN_PATH), SCOPES)
+
+    #2. if no valid creds, either refresh or do device flow login
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            try:
+                creds.refresh(Request())
+            except Exception:
+                creds = None
+
+        if not creds:
+            if not _CLIENT_SECRET_PATH.exists():
+                raise FileNotFoundError(
+                    f"Missing {_CLIENT_SECRET_PATH}. Download your OAuth "
+                    f"client ID JSON from Google Cloud Console and save it "
+                    f"as client_secret.json in the project root."
+                )
+            creds = _manual_flow_login()
+
+        #3. save for next time
+        _TOKEN_PATH.write_text(creds.to_json())
+
+    return creds
+
+
+#document building helpers
+
+#Google Docs batchUpdate works by inserting text at character indices and then applying formatting.  The simplest pattern for building a new doc:
+#1. Build the full plain text and track where each "span" starts/ends.
+#2. Insert all the text in one request.
+#3. Apply paragraph styles (headings) and character styles (bold) as separate requests referencing the tracked indices.
+#indices are 1-based (index 1 = start of the document body).
 
 
 class _DocBuilder:
@@ -60,8 +160,8 @@ class _DocBuilder:
 
     def __init__(self):
         self.text = ""
-        self._heading_spans = []   # (start, end, heading_level)
-        self._bold_spans = []      # (start, end)
+        self._heading_spans = []   #(start, end, heading_level)
+        self._bold_spans = []      #(start, end)
 
     def _pos(self):
         """Current insertion index (1-based, accounting for text so far)."""
@@ -95,7 +195,7 @@ class _DocBuilder:
         """Return the list of batchUpdate requests."""
         requests = []
 
-        # 1. Insert all text at index 1
+        #1. insert all text at index 1
         requests.append({
             "insertText": {
                 "location": {"index": 1},
@@ -103,7 +203,7 @@ class _DocBuilder:
             }
         })
 
-        # 2. Apply heading styles
+        #2. apply heading styles
         for start, end, level in self._heading_spans:
             heading_id = f"HEADING_{level}"
             requests.append({
@@ -114,7 +214,7 @@ class _DocBuilder:
                 }
             })
 
-        # 3. Apply bold
+        #3. apply bold
         for start, end in self._bold_spans:
             requests.append({
                 "updateTextStyle": {
@@ -127,9 +227,9 @@ class _DocBuilder:
         return requests
 
 
-# ---------- content formatting ----------
+#content formatting
 
-# Labels for funder_reqs fields so the doc reads naturally.
+#labels for funder_reqs fields so the doc reads naturally.
 FIELD_LABELS = {
     "funder_name": "Funder",
     "funder_overview": "Program Overview",
@@ -182,7 +282,7 @@ def _build_drafts_section(doc: _DocBuilder, drafted_sections: dict):
     )
     doc.add_line()
 
-    # Consistent display order
+    #consistent display order
     section_order = [
         "project_narrative",
         "needs_statement",
@@ -192,7 +292,7 @@ def _build_drafts_section(doc: _DocBuilder, drafted_sections: dict):
         "budget_justification",
     ]
 
-    # Sections in the defined order first, then any extras
+    #sections in the defined order first, then any extras
     ordered_keys = [k for k in section_order if k in drafted_sections]
     extras = [k for k in drafted_sections if k not in section_order]
     ordered_keys.extend(extras)
@@ -215,7 +315,7 @@ def _build_compliance_section(
     """Section 3: Compliance Notes."""
     doc.add_heading("Compliance Notes", level=1)
 
-    # Overall status
+    #overall status
     status = compliance_report.get("overall_status", "unknown")
     status_display = {
         "approved": "PASSED — All automated checks passed",
@@ -227,7 +327,7 @@ def _build_compliance_section(
     doc.add_bold_line(f"Status: {status_display}")
     doc.add_line()
 
-    # Programmatic checks
+    #programmatic checks
     prog = compliance_report.get("programmatic_checks", {})
     deadline = prog.get("deadline")
     if deadline:
@@ -246,14 +346,14 @@ def _build_compliance_section(
             )
         doc.add_line()
 
-    # Revision feedback (writer-fixable issues)
+    #revision feedback (writer-fixable issues)
     feedback = compliance_report.get("revision_feedback", "")
     if feedback:
         doc.add_bold_line("Revision Notes:")
         doc.add_line(f"  {feedback}")
         doc.add_line()
 
-    # Verify manually — applicant action items
+    #verify manually applicant action items
     if verify_manually:
         doc.add_heading("Action Items — Verify Manually", level=2)
         doc.add_line(
@@ -267,7 +367,7 @@ def _build_compliance_section(
         doc.add_line("No manual verification items.")
 
 
-# ---------- main function ----------
+#main function
 
 
 def save_to_google_docs(
@@ -296,40 +396,39 @@ def save_to_google_docs(
     if verify_manually is None:
         verify_manually = compliance_report.get("verify_manually", [])
 
-    # --- authenticate ---
+    #authenticate
     creds = _get_credentials()
     docs_service = build("docs", "v1", credentials=creds)
     drive_service = build("drive", "v3", credentials=creds)
 
-    # --- create empty doc ---
+    #create empty doc via Drive API (supports folder placement)
     funder_name = funder_reqs.get("funder_name", "Grant Opportunity")
     title = f"GrantPilot Draft — {funder_name}"
-    folder_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
     create_body = {
         "name": title,
         "mimeType": "application/vnd.google-apps.document",
     }
+    folder_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
     if folder_id:
         create_body["parents"] = [folder_id]
 
     doc = drive_service.files().create(body=create_body).execute()
     doc_id = doc["id"]
 
-    # --- build content ---
+    #build content
     builder = _DocBuilder()
     _build_funder_section(builder, funder_reqs)
     _build_drafts_section(builder, drafted_sections)
     _build_compliance_section(builder, compliance_report, verify_manually)
 
-    # --- write content to doc ---
+    #write content to doc
     requests = builder.build_requests()
     docs_service.documents().batchUpdate(
         documentId=doc_id,
         body={"requests": requests},
     ).execute()
 
-    # --- share if an email is configured ---
-    # new: shares to multiple
+    #share if email(s) configured (comma-separated)
     share_emails = os.environ.get("GOOGLE_DOCS_SHARE_EMAIL", "")
     for email in share_emails.split(","):
         email = email.strip()
