@@ -22,3 +22,4 @@ class GrantPilotState(TypedDict):
     revision_count: int #capped at 2 conditional edge checks this
     status: str #researching, writing, reviewing, approved, max_revisions_reached
     verify_manually: list #items only the applicant can resolve
+    doc_url: str #URL of the created Google Doc (set by save_docs_node)

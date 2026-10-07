@@ -3,3 +3,5 @@ google-genai
 tavily-python
 requests
 python-dotenv
+google-api-python-client
+google-auth

@@ -34,7 +34,8 @@ Application system: DOSgrants.com""",
     "revision_feedback": "",
     "revision_count": 0,
     "status": "researching",
-    "verify_manually": []
+    "verify_manually": [],
+    "doc_url": ""
 }
 
 print("=== RUNNING FULL GRAPH — Test 2: Florida SCP ===\n")
@@ -67,3 +68,6 @@ print(f"\nRevision feedback: {report['revision_feedback']}")
 print(f"\n=== VERIFY MANUALLY (applicant action items) ===")
 for item in result["verify_manually"]:
     print(f"  • {item}")
+
+print(f"\n=== GOOGLE DOC ===")
+print(f"URL: {result.get('doc_url', 'not created')}")
