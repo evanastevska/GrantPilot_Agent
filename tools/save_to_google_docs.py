@@ -105,25 +105,45 @@ def _manual_flow_login():
     )
 
 
+def _load_client_config():
+    """Load client config from env var (Render) or file (local dev)."""
+    env_json = os.environ.get("GOOGLE_CLIENT_SECRET_JSON")
+    if env_json:
+        return json.loads(env_json)
+    if _CLIENT_SECRET_PATH.exists():
+        with open(_CLIENT_SECRET_PATH) as f:
+            return json.load(f)
+    raise FileNotFoundError(
+        "No client secret found. Set GOOGLE_CLIENT_SECRET_JSON env var "
+        "or place client_secret.json in the project root."
+    )
+
+
 def _get_credentials():
     """Load or create OAuth2 credentials with automatic refresh.
 
+    Checks env vars first (for Render deployment where the filesystem
+    is ephemeral), then falls back to files (for local dev).
+
     Flow:
-    1. If token.json exists, load it.
+    1. Try loading token from GOOGLE_TOKEN_JSON env var or token.json file.
     2. If the token is expired, refresh it automatically.
-    3. If refresh fails or no token.json exists, run the device
-       flow (prints a URL + code to the terminal).
+    3. If refresh fails or no token exists, run the manual OAuth flow
+       (only works locally — Render uses the env var token).
 
     Returns:
         google.oauth2.credentials.Credentials
     """
     creds = None
 
-    #1. try loading existing token
-    if _TOKEN_PATH.exists():
+    #1. try env var first (Render), then file (local)
+    token_json = os.environ.get("GOOGLE_TOKEN_JSON")
+    if token_json:
+        creds = Credentials.from_authorized_user_info(json.loads(token_json), SCOPES)
+    elif _TOKEN_PATH.exists():
         creds = Credentials.from_authorized_user_file(str(_TOKEN_PATH), SCOPES)
 
-    #2. if no valid creds, either refresh or do device flow login
+    #2. if no valid creds, either refresh or do full login
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             try:
@@ -132,15 +152,12 @@ def _get_credentials():
                 creds = None
 
         if not creds:
-            if not _CLIENT_SECRET_PATH.exists():
-                raise FileNotFoundError(
-                    f"Missing {_CLIENT_SECRET_PATH}. Download your OAuth "
-                    f"client ID JSON from Google Cloud Console and save it "
-                    f"as client_secret.json in the project root."
-                )
+            # Full login — only works locally, not on Render
+            _load_client_config()  # validate config exists before prompting
             creds = _manual_flow_login()
 
-        #3. save for next time
+        #3. save for next time (local dev only — env var deployments
+        #   refresh from the stored refresh token on each cold start)
         _TOKEN_PATH.write_text(creds.to_json())
 
     return creds

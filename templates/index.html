@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrantPilot - Cinema Verde</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- password gate -->
+  <div id="login-section" class="login-overlay">
+    <div class="login-box">
+      <img src="/static/cv_logo.png" alt="Cinema Verde" class="login-logo">
+      <p class="login-label">Enter password to continue</p>
+      <input
+        type="password"
+        id="password-input"
+        placeholder="Password"
+        autocomplete="current-password"
+      >
+      <button id="login-btn" onclick="handleLogin()">Log in</button>
+      <p id="login-error" class="error-text" hidden></p>
+      <p class="cold-start-note">First load may take up to a minute.</p>
+    </div>
+  </div>
+
+  <!-- main app -->
+  <div id="app" hidden>
+
+    <nav>
+      <img src="/static/cv_logo.png" alt="Cinema Verde" class="nav-logo">
+      <a href="https://cinemaverde.org" target="_blank" rel="noopener" class="nav-link">cinemaverde.org</a>
+    </nav>
+
+    <main class="container">
+
+      <div class="hero">
+        <span class="tag">Internal Tool</span>
+        <h1>GrantPilot</h1>
+        <p class="hero-sub">Research and drafting tool for Cinema Verde grant applications. Paste an opportunity and receive a structured draft delivered to Google Docs.</p>
+      </div>
+
+      <div class="accent-line"></div>
+
+      <!-- input form -->
+      <section id="input-section">
+        <div class="form-card">
+
+          <p class="form-note">Fill in at least one of the fields below.</p>
+
+          <div class="field">
+            <label for="funder-url">Grant Guidelines URL</label>
+            <input
+              type="url"
+              id="funder-url"
+              placeholder="https://funder.org/grant-guidelines"
+            >
+          </div>
+
+          <div class="field">
+            <label for="grant-text">Opportunity Details</label>
+            <textarea
+              id="grant-text"
+              rows="8"
+              placeholder="Paste the grant opportunity here - RFP text, requirements, eligibility criteria, deadlines..."
+            ></textarea>
+          </div>
+
+          <button id="generate-btn" onclick="handleGenerate()">Generate Draft</button>
+          <p id="input-error" class="error-text" hidden></p>
+
+        </div>
+      </section>
+
+      <!-- progress -->
+      <section id="progress-section" hidden>
+        <div class="form-card">
+          <div class="progress-header">
+            <span class="spinner"></span>
+            <span id="progress-text">Starting...</span>
+          </div>
+          <div id="steps-list" class="steps-list"></div>
+          <p class="progress-note">This usually takes 2-5 minutes.</p>
+        </div>
+      </section>
+
+      <!-- results -->
+      <section id="results-section" hidden>
+
+        <div class="form-card result-top">
+          <a id="doc-link" class="doc-link" href="#" target="_blank" rel="noopener">
+            Open in Google Docs
+          </a>
+          <div id="result-meta" class="result-meta"></div>
+        </div>
+
+        <div id="action-items-card" class="form-card" hidden>
+          <h2 class="section-heading">Verify Before Submitting</h2>
+          <ul id="action-items-list" class="action-list"></ul>
+        </div>
+
+        <div id="funder-summary-card" class="form-card" hidden>
+          <h2 class="section-heading">Funder Research Summary</h2>
+          <dl id="funder-summary-dl" class="summary-dl"></dl>
+        </div>
+
+        <details id="activity-log-details" class="form-card" hidden>
+          <summary class="log-toggle">Show activity log</summary>
+          <div id="activity-log-content" class="log-content"></div>
+        </details>
+
+        <button class="btn-secondary" onclick="resetForm()">Generate another</button>
+
+      </section>
+
+      <!-- error -->
+      <section id="error-section" hidden>
+        <div class="form-card error-card">
+          <h2 class="section-heading" style="color: var(--red);">Something went wrong</h2>
+          <p id="error-message"></p>
+          <button class="btn-secondary" onclick="resetForm()">Try again</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+<script>
+//section visibility
+function showOnly(sectionId) {
+  ['input-section','progress-section','results-section','error-section']
+    .forEach(id => { document.getElementById(id).hidden = (id !== sectionId); });
+}
+
+//login
+async function handleLogin() {
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  const pw  = document.getElementById('password-input').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Logging in...';
+  err.hidden = true;
+
+  try {
+    const res  = await fetch('/login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({password: pw}),
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('login-section').hidden = true;
+      document.getElementById('app').hidden = false;
+    } else {
+      err.textContent = data.error || 'Incorrect password.';
+      err.hidden = false;
+    }
+  } catch (e) {
+    err.textContent = 'Connection error. Try again.';
+    err.hidden = false;
+  }
+  btn.disabled = false;
+  btn.textContent = 'Log in';
+}
+
+document.getElementById('password-input')
+  .addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+
+//generate
+let pollInterval = null;
+
+async function handleGenerate() {
+  const btn       = document.getElementById('generate-btn');
+  const err       = document.getElementById('input-error');
+  const grantText = document.getElementById('grant-text').value.trim();
+  const funderUrl = document.getElementById('funder-url').value.trim();
+
+  err.hidden = true;
+  if (!grantText && !funderUrl) {
+    err.textContent = 'Provide grant requirements text or a funder URL (or both).';
+    err.hidden = false;
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Starting...';
+
+  try {
+    const res  = await fetch('/generate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({funder_url: funderUrl, raw_grant_text: grantText}),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      err.textContent = data.error;
+      err.hidden = false;
+      btn.disabled = false;
+      btn.textContent = 'Generate Draft';
+      return;
+    }
+
+    document.getElementById('steps-list').innerHTML = '';
+    document.getElementById('progress-text').textContent = 'Starting...';
+    showOnly('progress-section');
+    startPolling(data.job_id);
+  } catch (e) {
+    err.textContent = 'Connection error. Try again.';
+    err.hidden = false;
+  }
+  btn.disabled = false;
+  btn.textContent = 'Generate Draft';
+}
+
+//polling with 6 minute timeout
+function startPolling(jobId) {
+  let seenCount = 0;
+  const startTime = Date.now();
+  const TIMEOUT = 6 * 60 * 1000;
+
+  pollInterval = setInterval(async () => {
+    //timeout check
+    if (Date.now() - startTime > TIMEOUT) {
+      clearInterval(pollInterval);
+      document.getElementById('error-message').textContent =
+        'This is taking longer than expected. Try again or check your connection.';
+      showOnly('error-section');
+      return;
+    }
+
+    try {
+      const res  = await fetch('/status/' + jobId);
+      const data = await res.json();
+
+      document.getElementById('progress-text').textContent = data.current_step;
+
+      //append new completed steps
+      const list = document.getElementById('steps-list');
+      const steps = data.steps_completed || [];
+      while (seenCount < steps.length) {
+        const d = document.createElement('div');
+        d.className = 'step-done';
+        d.textContent = steps[seenCount];
+        list.appendChild(d);
+        seenCount++;
+      }
+
+      if (data.status === 'complete') {
+        clearInterval(pollInterval);
+        renderResults(data);
+      } else if (data.status === 'error') {
+        clearInterval(pollInterval);
+        document.getElementById('error-message').textContent =
+          data.error || 'An unexpected error occurred.';
+        showOnly('error-section');
+      }
+    } catch (e) { console.error('Poll error:', e); }
+  }, 3000);
+}
+
+//render results
+function renderResults(data) {
+  //doc link
+  const link = document.getElementById('doc-link');
+  if (data.doc_url) { link.href = data.doc_url; link.hidden = false; }
+  else { link.hidden = true; }
+
+  //status + loop count
+  const meta = document.getElementById('result-meta');
+  let statusText = data.final_status === 'approved' ? 'Approved' : 'Max revisions reached';
+  const loops = data.revision_count || 0;
+  const loopText = loops === 1 ? '1 revision loop' : loops + ' revision loops';
+  meta.innerHTML =
+    '<span class="meta-status ' + (data.final_status === 'approved' ? 'meta-approved' : 'meta-revisions') + '">' +
+    statusText + '</span> · ' + loopText;
+
+  //action items
+  const ac = document.getElementById('action-items-card');
+  const al = document.getElementById('action-items-list');
+  al.innerHTML = '';
+  if (data.verify_manually && data.verify_manually.length) {
+    data.verify_manually.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      al.appendChild(li);
+    });
+    ac.hidden = false;
+  } else { ac.hidden = true; }
+
+  //funder summary
+  const sc = document.getElementById('funder-summary-card');
+  const dl = document.getElementById('funder-summary-dl');
+  dl.innerHTML = '';
+  const fl = {
+    funder_name:'Funder', deadline:'Deadline', funding_amount:'Funding Amount',
+    eligibility:'Eligibility', required_sections:'Required Sections',
+    evaluation_criteria:'Evaluation Criteria'
+  };
+  const sum = data.funder_summary || {};
+  let any = false;
+  Object.entries(fl).forEach(([k, label]) => {
+    const v = sum[k];
+    if (!v || v === '') return;
+    any = true;
+    const dt = document.createElement('dt'); dt.textContent = label; dl.appendChild(dt);
+    const dd = document.createElement('dd');
+    if (Array.isArray(v)) dd.textContent = v.join(', ');
+    else if (v === "couldn't_determine") { dd.textContent = 'Could not determine - verify manually'; dd.classList.add('verify-flag'); }
+    else if (typeof v === 'object') dd.textContent = JSON.stringify(v);
+    else dd.textContent = String(v);
+    dl.appendChild(dd);
+  });
+  sc.hidden = !any;
+
+  //activity log
+  const lc = document.getElementById('activity-log-content');
+  lc.innerHTML = '';
+  if (data.activity_log && data.activity_log.length) {
+    data.activity_log.forEach(e => {
+      const d = document.createElement('div'); d.className = 'log-entry';
+      const h = document.createElement('div'); h.className = 'log-header';
+      h.textContent = 'Loop ' + e.loop; d.appendChild(h);
+      const sl = document.createElement('div'); sl.className = 'log-line';
+      sl.textContent = 'Reviewer: ' + e.status + (e.revision_type ? ' (' + e.revision_type + ' gap)' : '');
+      d.appendChild(sl);
+      if (e.feedback) {
+        const fb = document.createElement('div'); fb.className = 'log-line log-feedback';
+        fb.textContent = 'Feedback: ' + e.feedback; d.appendChild(fb);
+      }
+      lc.appendChild(d);
+    });
+    const t = document.createElement('div'); t.className = 'log-total';
+    t.textContent = 'Total revision loops: ' + data.revision_count;
+    lc.appendChild(t);
+    document.getElementById('activity-log-details').hidden = false;
+  } else { document.getElementById('activity-log-details').hidden = true; }
+
+  showOnly('results-section');
+}
+
+//reset form
+function resetForm() {
+  document.getElementById('grant-text').value = '';
+  document.getElementById('funder-url').value = '';
+  document.getElementById('input-error').hidden = true;
+  showOnly('input-section');
+}
+</script>
+</body>
+</html>

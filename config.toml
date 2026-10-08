@@ -1,0 +1,7 @@
+[theme]
+# Cinema Verde brand purple — pulled from site logo/nav
+primaryColor = "#7B2D8E"
+backgroundColor = "#FAFAFA"
+secondaryBackgroundColor = "#F0ECF3"
+textColor = "#1A1A1A"
+font = "sans serif"
