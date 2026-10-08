@@ -1,4 +1,4 @@
-﻿venv/
-.env
+﻿__pycache__/
+token.json
 client_secret.json
-token.json__pycache__/
+.env
