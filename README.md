@@ -1,6 +1,6 @@
 # GrantPilot
 
-Multi-agent grant research and drafting system built for [Cinema Verde](https://www.cinemaverde.org/), a nonprofit environmental film festival in Gainesville, FL.
+Multi-agent grant research and drafting system built during an internship at [Cinema Verde](https://www.cinemaverde.org/), a nonprofit environmental organization in Gainesville, FL.
 
 Three agents (Research, Writer, Reviewer) run in a LangGraph state graph. The Research Agent extracts structured funder requirements from a URL, pasted grant text, or both. The Writing Agent drafts grant sections grounded in those requirements and Cinema Verde's verified org profile. The Review Agent checks compliance and routes revision feedback back to the right agent. Final output saves to a formatted Google Doc.
 
